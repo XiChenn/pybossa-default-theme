@@ -13,4 +13,8 @@
 {% endif %}
 
 {{ render_form(form, action_url=action_url) }}
+<div>
+    <h3>{{_('Data classifications')}}</h3>
+    {% include "projects/data_classification.html" %}
+</div>
 {% endblock %}
