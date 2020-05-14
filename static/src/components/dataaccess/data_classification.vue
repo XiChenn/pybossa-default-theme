@@ -7,14 +7,14 @@
       <div class="col-md-8">
         <v-select
           v-model="inputData"
-          label="dataClassification"
+          label="classification"
           :options="options"
-          :selectable="option => option.valid"
+          :selectable="option => option.enabled"
         >
           <template #search="{attributes, events}">
             <input
               class="vs__search"
-              :required="!selected"
+              :required="!inputData"
               v-bind="attributes"
               v-on="events"
             >
@@ -28,22 +28,22 @@
       </div>
       <div class="col-md-8">
         <v-select
-          label="dataClassification"
+          v-model="outputData"
+          label="classification"
           :options="options"
-          :selectable="option => option.valid"
+          :selectable="option => option.enabled"
         >
           <template #search="{attributes, events}">
             <input
-              v-model="outputData"
               class="vs__search"
-              :required="!selected"
+              :required="!outputData"
               v-bind="attributes"
               v-on="events"
             >
           </template>
         </v-select>
       </div>
-    </div> 
+    </div>
     <div class="form-group row">
       <div class="col-md-8">
         <button
@@ -61,7 +61,6 @@
 import Vue from 'vue';
 import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
-// import { mapGetters } from 'vuex';
 
 Vue.component('v-select', vSelect);
 
@@ -69,22 +68,13 @@ export default {
     components: {
         'v-select': vSelect
     },
-    props: {
-        inputData: { type: String, default: null },
-        outputData: { type: String, default: null },
-        dcoptions: { type: Object },
-        csrfToken: { type: String }
-    },
     data () {
-        var dataClassificationOptions = this.dcoptions.map(
-            function (item) {
-                return {
-                    dataClassification: item.name,
-                    valid: item.enabled
-                };
-            });
         return {
-            options: dataClassificationOptions
+            inputData: '',
+            outputData: '',
+            // dcoptions: [],
+            csrfToken: '',
+            options: []
         };
     },
 
@@ -92,26 +82,12 @@ export default {
         this.getData();
     },
 
-    // computed: {
-    // ...mapGetters(['csrfToken'])
-    // },
-
     methods: {
         initialize (data) {
-            let jdata = JSON.parse(data);
-            // this.inputData = jdata.input_data;
-            // this.outputData = jdata.output_data;
-            // this.csrfToken = jdata.csrf;
-            this.setData({ csrfToken: jdata.csrf });
-
-            // this.consensusThreshold = config.consensus_threshold;
-            // this.redundancyConfig = config.redundancy_config;
-            // this.maxRetries = config.max_retries;
-            // this.setData({
-            //     csrf: data.csrf,
-            //     answerFields: JSON.parse(data.answer_fields),
-            //     consensus: config
-            // });
+            this.inputData = data.input_data;
+            this.outputData = data.output_data;
+            this.csrfToken = data.csrf;
+            this.options = data.options;
         },
 
         getURL () {
@@ -130,26 +106,24 @@ export default {
           },
           credentials: 'same-origin'
         });
-        const data = await res.json();
-        this.initialize(data);
+        const response = await res.json();
+        this.initialize(response);
       } catch (error) {
         window.pybossaNotify('An error occurred.', true, 'error');
       }
     },
 
         async save () {
-            // let data = { answer_fields: this.answerFields };
-            var csrftoken = '{{ csrf_token() }}';
             let data = {
-                input_data_classification: this.inputData,
-                output_data_classification: this.outputData
+                input_data: this.inputData.classification,
+                output_data: this.outputData.classification
             };
             try {
                 const res = await fetch(this.getURL(), {
                     method: 'POST',
                     headers: {
                         'content-type': 'application/json',
-                        'X-CSRFToken': csrftoken
+                        'X-CSRFToken': this.csrfToken
                     },
                     credentials: 'same-origin',
                     body: JSON.stringify(data)

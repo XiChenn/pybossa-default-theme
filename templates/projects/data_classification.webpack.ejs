@@ -1,12 +1,6 @@
 {% block dataaccesscontent %}
 <div id="dataclassification" class = "col-md-6">
-    <data-classification
-        :inputData="{{input_data_classification | tojson | forceescape}}"
-        :outputData="{{output_data_classification | tojson | forceescape}}"
-        :dcoptions="{{data_classification_options | tojson | forceescape}}"
-        :csrfToken="'{{csrf}}'"
-    >
-    </data-classification>
+    <data-classification></data-classification>
 </div>
 <script src="<%= htmlWebpackPlugin.files.chunks.dataclassification.entry %>"></script>
 {% endblock %}
